@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "testrtl"
+version = "0.1.0"
+description = ""
+authors = ["Vladislav-Shi <vlad.shirobockow@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiogram = "^3.6.0"
+pymongo = "^4.7.2"
+pytest = "^8.2.1"
+pydantic-settings = "^2.2.1"
+motor = "^3.4.0"
+pytest-asyncio = "^0.23.7"
+mongomock = "^4.1.2"
+mypy = "^1.10.0"
+flake8 = "^7.0.0"
+flake8-pyproject = "^1.2.3"
+mongomock-motor = "^0.0.29"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.flake8]
+max-line-length = 120
+exclude = [
+    ".git",
+    ".venv",
+    ".pytest_cache",
+    "__pycache__"
+]
+
+[tool.mypy]
+python_version = "3.11"
+exclude = [
+    ".git",
+    ".venv",
+    ".pytest_cache",
+    "__pycache__"
+]

@@ -1,0 +1,22 @@
+version: "3"
+services:
+  tg_bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tg_bot
+    image: tg_bot
+    env_file:
+      - .env
+    environment:
+      MONGO_HOST: tg_mongo
+  tg_mongo:
+    container_name: tg_mongo
+# mongorestore mongodb://root:example@192.168.80.1:27017/ /dump/ --authenticationDatabase=admin
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
