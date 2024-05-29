@@ -18,6 +18,7 @@ mypy = "^1.10.0"
 flake8 = "^7.0.0"
 flake8-pyproject = "^1.2.3"
 mongomock-motor = "^0.0.29"
+python-dateutil = "^2.9.0.post0"
 
 
 [build-system]

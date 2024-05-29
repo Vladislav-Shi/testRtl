@@ -4,7 +4,7 @@ from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 
 from utils.salary_aggregation.exeptions import ValidationException
-from utils.salary_aggregation.models import GROUP_ISO_MAPPING
+from utils.salary_aggregation.models import GROUP_ISO_MAPPING, GROUP_ISO_STEP_MAPPING
 
 
 class BaseAggregator:
@@ -35,14 +35,26 @@ class MongoAggregator(BaseAggregator):
         else:
             return date_string
 
-    def _formatting_result(self, raw_result: list[dict], group_type: str) -> dict:
+    def _set_empty_result(self, dt_from: str, dt_upto: str, group_type: str) -> list[str]:
+        """Т.к. если значенйи в бд нет, то должно быть 0, инициируем значения"""
+        dates = []
+        step = GROUP_ISO_STEP_MAPPING[group_type]
+        cur = datetime.fromisoformat(dt_from)
+        end = datetime.fromisoformat(dt_upto)
+        while cur <= end:
+            dates.append(cur.isoformat())
+            cur += step
+        return dates
+
+    def _formatting_result(self, raw_result: dict, dates: list[str]) -> dict:
         result: dict = {
             'dataset': [],
             'labels': []
         }
-        for data in raw_result:
-            result['dataset'].append(data['value'])
-            result['labels'].append(self._date_formatting(data['_id'], group_type))
+        for date in dates:
+            value = raw_result[date] if date in raw_result else 0
+            result['dataset'].append(value)
+            result['labels'].append(date)
         return result
 
     def _get_aggregate_dict(self, dt_from: str, dt_upto: str, group_type: str) -> list[dict]:
@@ -71,6 +83,12 @@ class MongoAggregator(BaseAggregator):
             }
         ]
 
+    async def _aggregate(self, query: list[dict], group_type: str) -> dict[str, int]:
+        """Возвращает Dict в формате date: number"""
+        collection = self._get_collection()
+        response = await collection.aggregate(query).to_list(None)
+        return {self._date_formatting(row['_id'], group_type): row['value'] for row in response}
+
     async def get_salary(
             self,
             dt_from: str,
@@ -87,8 +105,8 @@ class MongoAggregator(BaseAggregator):
             errors['group_type'] = f'group_type is incorrect {group_type}'
         if len(errors) > 0:
             raise ValidationException(message='Validation error in', details=errors)
-        collection = self._get_collection()
         query = self._get_aggregate_dict(dt_from, dt_upto, group_type)
-        raw_result = await collection.aggregate(query).to_list(None)
-        result = self._formatting_result(raw_result=raw_result, group_type=group_type)
+        raw_result = await self._aggregate(query=query, group_type=group_type)
+        dates = self._set_empty_result(dt_from=dt_from, dt_upto=dt_upto, group_type=group_type)
+        result = self._formatting_result(raw_result=raw_result, dates=dates)
         return result
