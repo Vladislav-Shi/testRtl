@@ -42,7 +42,8 @@ class MongoAggregator(BaseAggregator):
         cur = datetime.fromisoformat(dt_from)
         end = datetime.fromisoformat(dt_upto)
         while cur <= end:
-            dates.append(cur.isoformat())
+            date = self._date_formatting(cur.strftime(GROUP_ISO_MAPPING[group_type]), group_type=group_type)
+            dates.append(date)
             cur += step
         return dates
 

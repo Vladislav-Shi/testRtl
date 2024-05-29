@@ -36,19 +36,22 @@ async def test_wrong_input(input_data, client):
 
 @pytest.mark.asyncio
 async def test_input_week(client):
-    res = {
-        'dataset': [1029, 26097],
-        'labels': ['2022-12-19T00:00:00', '2022-12-26T00:00:00']
-    }
-    dt_from = '2022-01-30T00:00:00'
-    dt_upto = '2023-01-30T00:00:00'
+    res = {'dataset': [0, 0, 0, 1029, 26097, 0],
+           'labels': ['2022-11-28T00:00:00',
+                      '2022-12-05T00:00:00',
+                      '2022-12-12T00:00:00',
+                      '2022-12-19T00:00:00',
+                      '2022-12-26T00:00:00',
+                      '2023-01-02T00:00:00']}
+    dt_from = '2022-11-30T00:00:00'
+    dt_upto = '2023-01-05T00:00:00'
     group_type = 'week'
     aggregator = MongoAggregator(await client)
     result = await aggregator.get_salary(
         dt_from=dt_from,
         group_type=group_type,
         dt_upto=dt_upto)
-    assert res == result
+    assert result == res
 
 
 @pytest.mark.asyncio
