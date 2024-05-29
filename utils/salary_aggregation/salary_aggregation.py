@@ -51,7 +51,7 @@ class MongoAggregator(BaseAggregator):
                 '$match':
                     {
                         "dt": {'$gte': datetime.fromisoformat(dt_from),
-                               '$lt': datetime.fromisoformat(dt_upto),
+                               '$lte': datetime.fromisoformat(dt_upto),
                                }
                     },
             },
@@ -62,6 +62,11 @@ class MongoAggregator(BaseAggregator):
                         'date': '$dt'
                     }},
                     'value': {'$sum': '$value'}
+                }
+            },
+            {
+                '$sort': {
+                    '_id': 1
                 }
             }
         ]
